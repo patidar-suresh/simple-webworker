@@ -1,2 +1,2 @@
 # simple-webworker
-A simple example to create a web worker for your web application
+A simple example to demonstrate web application performance and responsive behavior using web worker
