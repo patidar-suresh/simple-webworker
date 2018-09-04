@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html>
+  <title>Simple Web Worker</title>
+  <body>
+    <p>Current time is: <output id="currentTime"></output></p>      
+    <label>Type message: </label><input type="text" onkeyup="showMessage(event);" value=""> Echo message:<label id="message"></label>
+    <p>For demonstrating application performance and responsiveness, we are showing current time continuously updated at an interval of 100ms. We also have an input box that echo the message you enter in it</p>
+    <p>We have two buttons to start CPU intensive processing for 10 seconds, one in web worker and other in non web worker mode.</p>
+  
+    <h3>CPU intensive processing in non web worker mode</h3>
+    <button onclick="startCalcInMainThread()">Process</button>
+    <h5>Total Iterations: <output id="resultMainThread"></output></h5>
+    <p>UI will be blocked during this calculation. The current time will stop updating and you won't be able to enter message in text box. </p>   
+    <br>
+    <h3>CPU intensive processing in web worker mode</h3>
+    <button onclick="startCalcInWorkerThread()">Process</button>
+    <h5>Total Iterations: <output id="resultWorkerThread"></output></h5>
+    <p>UI remains responsive during this calculation. The current time will keep updating and you will be able to enter message in text box. </p>   
+    <script>
+      window.setInterval(function() {
+        let now = new Date();
+        let h = now.getHours();
+        let m = now.getMinutes();
+        let s = now.getSeconds();
+        let ms = now.getMilliseconds();
+        document.getElementById("currentTime").innerHTML = h +':' + m + ':' + s + '.' + ms;
+      },100);
+      function showMessage(e) {
+        document.getElementById('message').innerHTML = e.currentTarget.value;
+      }
+
+      function startCalcInMainThread() {
+        document.getElementById("resultMainThread").innerHTML = CpuIntensiveCalc(10000);
+      }
+
+      function startCalcInWorkerThread() {
+        if(typeof(Worker) !== "undefined") {
+          let worker = new Worker("my-worker.js");
+          worker.onmessage = function(event) {
+            document.getElementById("resultWorkerThread").innerHTML = event.data;
+          }
+          worker.postMessage(10000);
+        } else {
+          document.getElementById("resultWorkerThread").innerHTML = "Web worker not supported!";
+        }
+      }
+
+      function CpuIntensiveCalc(duration) {
+        const before = new Date();
+        let count = 0;
+        while (true) {
+          count++;
+          const now = new Date();
+          if (now.valueOf() - before.valueOf() > duration) {
+            break;
+          }
+        }    
+        return count;
+      }
+
+    </script>
+  </body>
+</html>
